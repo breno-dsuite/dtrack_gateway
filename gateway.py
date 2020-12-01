@@ -9,7 +9,7 @@ import time
 # SERVER_URL = '0.0.0.0:9999'
 # GATEWAY_ID = ''
 
-with open('.env', 'r') as f:
+with open('config.json', 'r') as f:
     dados = json.loads(f.read())
     SECURE = dados.get('SECURE', True)
     SERVER_URL = dados.get('SERVER_URL', None)
