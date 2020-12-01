@@ -35,13 +35,9 @@ def connect_websocket():
                                 on_error=on_error,
                                 on_close=on_close)
     ws.on_open = on_open
-    ws.run_forever(skip_utf8_validation=True,
-                   # ping_interval=20,
-                   # ping_timeout=2
-                   )
-    # wst = Thread(target=ws.run_forever)
-    # wst.daemon = True
-    # wst.start()
+    ws.run_forever(
+        skip_utf8_validation=True,
+    )
 
 
 def on_message(ws, message):
@@ -135,96 +131,6 @@ def on_message(ws, message):
                 dados['online'] = False
         ws.send(json.dumps(dados))
 
-    # def impressora_cupom(evento):
-    #     pass
-    #     import escpos as printer
-    #     # import re
-    #     # import lxml
-    #     # import requests
-    #     # impressora = evento.get('impressora')
-    #     # url = evento.get('url')
-    #     # logo = evento.get('logo')
-    #     # try:
-    #     #     r = requests.get(url)
-    #     #     url_qr = re.search('"https:\/\/nfce.*?"',
-    #     #                        r.text).group().replace('"', '')
-    #     #     html = lxml.html.fromstring(r.text)
-    #     #     epson = printer.Network(impressora, timeout=2)
-    #     #     epson.charcode('PORTUGUESE')
-    #     #     epson.line_spacing(40)
-    #     #     if logo:
-    #     #         if logo not in CACHE_LOGO:
-    #     #             print('PEGANDO LOGO')
-    #     #             l = requests.get(logo)
-    #     #             with lock:
-    #     #                 CACHE_LOGO[logo] = Image.open(BytesIO(l.content))
-    #     #         epson.set(align='center')sdf
-    #     #         epson.image(CACHE_LOGO[logo])
-    #     #
-    #     #     # DADOS EMPRESA
-    #     #     imprimir_lista(epson,
-    #     #                    get_text_from_td(html, 'dados-da-empresa'),
-    #     #                    alinhamento='center')
-    #     #     epson.text('\n')
-    #     #
-    #     #     # DADOS AUXILIARES
-    #     #     imprimir_lista(epson,
-    #     #                    get_text_from_td(html, 'documento-auxiliar'),
-    #     #                    fonte='b', alinhamento='center')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # PRODUTOS
-    #     #     imprimir_lista(epson, get_lista_produtos(html), fonte='b')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # VALOR TOTAL
-    #     #     imprimir_lista(epson,
-    #     #                    get_text_from_td_duplo_b(html, 'valor-total'),
-    #     #                    fonte='b')
-    #     #
-    #     #     # FORMA PAGAMENTO
-    #     #     imprimir_lista(epson, get_text_from_td_duplo_b(html,
-    #     #                                                    'forma-pagamento'),
-    #     #                    fonte='b')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # TRIBUTACAO
-    #     #     imprimir_lista(epson,
-    #     #                    get_text_from_td_duplo_b(html, 'tributacao'),
-    #     #                    fonte='b')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # INFOS-ADICIONAIS
-    #     #     imprimir_lista(epson,
-    #     #                    get_text_from_td(html, 'info-adicionais'),
-    #     #                    fonte='b')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # HOMOLOGACAO
-    #     #     imprimir_lista(epson, get_text_from_td(html, 'homologacao'),
-    #     #                    fonte='b', alinhamento='center')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # CONSUMIDOR
-    #     #     imprimir_lista(epson, get_text_from_td(html, 'consumidor'),
-    #     #                    fonte='b', alinhamento='center')
-    #     #
-    #     #     linha(epson)
-    #     #
-    #     #     # QR CODE
-    #     #     imprimir_lista(epson, get_text_from_td(html, 'qrcode'),
-    #     #                    fonte='b', alinhamento='center')
-    #     #
-    #     #     epson.qr(url_qr, size=3, ec=3, native=True)
-    #     #
-    #     #     epson.cut()
-
     if DEBUG:
         log_to_file(message)
 
@@ -232,20 +138,14 @@ def on_message(ws, message):
 
     router = {
         'balanca': balanca,
-        # 'ping_balanca': ping_balanca,
         'impressora': impressora,
         'impressora_cupom': impressora,
-        # 'impressora_cupom': impressora,
-        # 'ping_impressora': impressora,
-        # 'ping_impressora_cupom': impressora,
     }
     if 'type' in message:
         router[message['type']](message)
 
 
 def on_error(ws, error):
-
-    # ws.close()
     log_to_file(f"ERROR - {error}")
 
 
@@ -253,10 +153,6 @@ def on_close(ws):
     try:
         log_to_file('CLOSE')
         time.sleep(5)
-        # ws.close()
-        # wst = Thread(target=connect_websocket)
-        # wst.daemon = True
-        # wst.start()
         connect_websocket()
     except KeyboardInterrupt:
         pass
@@ -264,15 +160,6 @@ def on_close(ws):
 
 def on_open(ws):
     log_to_file('OPEN')
-    # def run(*args):
-    #     for i in range(3):
-    #         time.sleep(1)
-    #         ws.send("Hello %d" % i)
-    #     time.sleep(1)
-    #     ws.close()
-    #     print("thread terminating...")
-    #
-    # thread.start_new_thread(run, ())
 
 
 if __name__ == "__main__":
