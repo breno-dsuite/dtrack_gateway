@@ -1,6 +1,7 @@
 {
 "SECURE": true,
-"SERVER_URL": "krug.dtrack.com.br",
-"GATEWAY_ID": "a5e7037f-9f60-4cdf-8367-b37df3ba9b32",
+"SERVER_URL": "ws.dsuite.com.br",
+"GATEWAY_TOKEN": "0d3aca53-ffd3-43bf-90ed-2ff2b8770836",
+"GATEWAY_SECRET": "4c29c7a0-cab5-4b0b-b028-ebe52b0c6180",
 "DEBUG": true
 }

@@ -4,25 +4,29 @@ from datetime import datetime
 import serial
 import websocket
 import time
+from websocket import create_connection
 
 # SECURE = False
 # SERVER_URL = '0.0.0.0:9999'
-# GATEWAY_ID = ''
+# GATEWAY_TOKEN = ''
 
 with open('config.json', 'r') as f:
     dados = json.loads(f.read())
     SECURE = dados.get('SECURE', True)
     SERVER_URL = dados.get('SERVER_URL', None)
-    GATEWAY_ID = dados.get('GATEWAY_ID', None)
+    GATEWAY_TOKEN = dados.get('GATEWAY_TOKEN', None)
+    GATEWAY_SECRET = dados.get('GATEWAY_SECRET', None)
     DEBUG = dados.get('DEBUG', True)
     if not SERVER_URL:
         raise Exception('Favor informar SERVER_URL no arquivo .env')
-    if not GATEWAY_ID:
-        raise Exception('Favor informar GATEWAY_ID no arquivo .env')
+    if not GATEWAY_TOKEN:
+        raise Exception('Favor informar GATEWAY_TOKEN no arquivo .env')
+    if not GATEWAY_SECRET:
+        raise Exception('Favor informar GATEWAY_SECRET no arquivo .env')
 
 
 def log_to_file(log):
-    msg = f'{datetime.now().isoformat()} - {SERVER_URL} - {GATEWAY_ID} - {log}\n'
+    msg = f'{datetime.now().isoformat()} - {SERVER_URL} - {GATEWAY_TOKEN} - {log}\n'
     if DEBUG:
         print(msg)
     with open('gateway.log', 'a') as f:
@@ -30,17 +34,27 @@ def log_to_file(log):
 
 
 def connect_websocket():
-    ws = websocket.WebSocketApp(f"ws{'s' if SECURE else ''}://{SERVER_URL}/ws/gateway/{GATEWAY_ID}/",
+    ws = websocket.WebSocketApp(f"ws{'s' if SECURE else ''}://{SERVER_URL}/",
+                                header={
+                                    'gateway_token': GATEWAY_TOKEN,
+                                    'gateway_secret': GATEWAY_SECRET,
+                                },
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)
     ws.on_open = on_open
     ws.run_forever(
         skip_utf8_validation=True,
+        ping_interval=30,
+        ping_timeout=5,
     )
 
 
 def on_message(ws, message):
+    def ping(evento):
+        data = {"action": "sendmessage", "data": {'type': 'ping', 'gateway_token': GATEWAY_TOKEN}}
+        ws.send(json.dumps(data))
+
     def ler_serial(evento):
         def parse_peso(str_peso):
             if DEBUG:
@@ -132,21 +146,28 @@ def on_message(ws, message):
         ws.send(json.dumps(dados))
 
     if DEBUG:
-        log_to_file(message)
+        log_to_file(f"MSG - {message}")
 
     message = json.loads(message)
 
     router = {
+        'ping': ping,
         'balanca': balanca,
         'impressora': impressora,
         'impressora_cupom': impressora,
     }
     if 'type' in message:
         router[message['type']](message)
+    elif 'message' in message:
+        log_to_file(f"ROUTE NOT FOUND - {message}")
+        ws.close()
+        connect_websocket()
 
 
 def on_error(ws, error):
     log_to_file(f"ERROR - {error}")
+    ws.close()
+    connect_websocket()
 
 
 def on_close(ws):
