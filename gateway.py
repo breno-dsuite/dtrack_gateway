@@ -8,7 +8,6 @@ import websocket
 import time
 import usb.core
 import usb.util
-from websocket import create_connection
 
 # SECURE = False
 # SERVER_URL = '0.0.0.0:9999'
