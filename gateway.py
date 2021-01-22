@@ -161,31 +161,20 @@ def on_message(ws, message):
         else:
             try:
                 device = usb.core.find(idVendor=int(id_vendor), idProduct=int(id_product))
-                in_ep = 0x82
-                out_ep = 0x01
                 if device is not None:
-                    check_driver = None
-                    try:
-                        check_driver = device.is_kernel_driver_active(0)
-                    except NotImplementedError:
-                        pass
-
-                    if check_driver is None or check_driver:
-                        try:
-                            device.detach_kernel_driver(0)
-                        except usb.core.USBError as e:
-                            if check_driver is not None:
-                                print("Could not detatch kernel driver: {0}".format(str(e)))
-
-                    try:
-                        device.set_configuration()
-                        device.reset()
-                    except usb.core.USBError as e:
-                        print("Could not set configuration: {0}".format(str(e)))
+                    device.set_configuration()
+                    cfg = device.get_active_configuration()
+                    intf = cfg[(0, 0)]
+                    ep = usb.util.find_descriptor(
+                        intf,
+                        custom_match= \
+                            lambda e: \
+                                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                                usb.util.ENDPOINT_OUT)
                     if print_id and print_secret:
                         r_codigo = requests.get(f'https://{host}/gateway/codigo_print_id/{print_id}/{print_secret}')
                         if r_codigo.status_code == 200:
-                            device.write(out_ep, r_codigo.content, timeout)
+                            ep.write(r_codigo.content)
                             usb.util.dispose_resources(device)
                             log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - OK")
                 else:
@@ -239,11 +228,6 @@ def on_open(ws):
 
 if __name__ == "__main__":
     websocket.enableTrace(DEBUG)
-    ws = websocket.create_connection(f"ws{'s' if SECURE else ''}://{SERVER_URL}/",
-                                header={
-                                    'gateway_token': GATEWAY_TOKEN,
-                                    'gateway_secret': GATEWAY_SECRET,
-                                })
     try:
         connect_websocket()
     except Exception as err:
