@@ -1,2 +1,3 @@
 serial
 websocket_client
+pyusb

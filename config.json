@@ -1,7 +1,7 @@
 {
 "SECURE": true,
 "SERVER_URL": "ws.dsuite.com.br",
-"GATEWAY_TOKEN": "0d3aca53-ffd3-43bf-90ed-2ff2b8770836",
-"GATEWAY_SECRET": "4c29c7a0-cab5-4b0b-b028-ebe52b0c6180",
+"GATEWAY_TOKEN": "34811b62-c3f5-4f7e-a289-87c714b3abca",
+"GATEWAY_SECRET": "92479f72-c295-407c-9517-0ccada134878",
 "DEBUG": true
 }
