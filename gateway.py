@@ -9,10 +9,6 @@ import time
 import usb.core
 import usb.util
 
-# SECURE = False
-# SERVER_URL = '0.0.0.0:9999'
-# GATEWAY_TOKEN = ''
-
 with open('config.json', 'r') as f:
     dados = json.loads(f.read())
     SECURE = dados.get('SECURE', True)
@@ -128,7 +124,6 @@ def on_message(ws, message):
         ip = evento.get('ip', '')
         id_vendor = evento.get('id_vendor', '')
         id_product = evento.get('id_product', '')
-
         porta = evento.get('porta', 9100)
         timeout = evento.get('timeout', 1)
         dados = {
@@ -161,20 +156,21 @@ def on_message(ws, message):
             try:
                 device = usb.core.find(idVendor=int(id_vendor), idProduct=int(id_product))
                 if device is not None:
+                    device.reset()
                     device.set_configuration()
                     cfg = device.get_active_configuration()
                     intf = cfg[(0, 0)]
                     ep = usb.util.find_descriptor(
                         intf,
-                        custom_match= \
-                            lambda e: \
-                                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                                usb.util.ENDPOINT_OUT)
+                        custom_match=lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT
+                    )
                     if print_id and print_secret:
                         r_codigo = requests.get(f'https://{host}/gateway/codigo_print_id/{print_id}/{print_secret}')
                         if r_codigo.status_code == 200:
-                            ep.write(r_codigo.content)
+                            # device.write(ep.bEndpointAddress, r_codigo.content, 1000000)
+                            ep.write(r_codigo.content, 300000)
                             usb.util.dispose_resources(device)
+                            device.reset()
                             log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - OK")
                 else:
                     log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - NÃO ENCONTRADO")
