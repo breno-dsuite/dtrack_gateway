@@ -165,13 +165,26 @@ def on_message(ws, message):
                         custom_match=lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT
                     )
                     if print_id and print_secret:
-                        r_codigo = requests.get(f'https://{host}/gateway/codigo_print_id/{print_id}/{print_secret}')
-                        if r_codigo.status_code == 200:
-                            # device.write(ep.bEndpointAddress, r_codigo.content, 1000000)
-                            ep.write(r_codigo.content, 300000)
+                        content = None
+                        def get_codigo():
+                            r_codigo = requests.get(f'https://{host}/gateway/codigo_print_id/{print_id}/{print_secret}')
+                            if r_codigo.status_code == 200:
+                                return r_codigo.content
+                            else:
+                                time.sleep(1)
+                            return None
+                        for x in range(10):
+                            content = get_codigo()
+                            if content:
+                                break
+                        if content:
+                            ep.write(content, 300000)
                             usb.util.dispose_resources(device)
                             device.reset()
                             log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - OK")
+                        else:
+                            log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - ERRO PEGAR CODIGO")
+
                 else:
                     log_to_file(f"{evento['type']} - {id_vendor} - {id_product} - {print_id} - NÃO ENCONTRADO")
                     dados['online'] = False
