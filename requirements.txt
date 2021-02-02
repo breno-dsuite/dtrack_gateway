@@ -2,3 +2,5 @@ serial
 websocket_client
 pyusb
 # pywin32
+pyodbc
+requests
