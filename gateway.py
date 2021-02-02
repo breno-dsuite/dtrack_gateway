@@ -159,7 +159,7 @@ def print_windows(details):
 		printer = win32print.OpenPrinter(details['printer_name'])
 		try:
 			print_job = win32print.StartDocPrinter(
-				printer, 1, (details['description'].encode('utf-8'),
+				printer, 1, (details['description'],
 				             None, "RAW")
 				)
 			try:
