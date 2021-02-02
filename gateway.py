@@ -3,7 +3,6 @@ import socket
 import time
 import datetime
 from json import JSONEncoder
-
 import pyodbc
 import requests
 import serial
@@ -160,7 +159,8 @@ def print_windows(details):
 		printer = win32print.OpenPrinter(details['printer_name'])
 		try:
 			print_job = win32print.StartDocPrinter(
-				printer, 1, (details['print_description'], None, "RAW")
+				printer, 1, (details['print_description'].encode('utf-8'),
+				             None, "RAW")
 				)
 			try:
 				win32print.StartPagePrinter(printer)
@@ -218,6 +218,7 @@ def print_usb(details):
 			# idProduct=int(id_product)
 			)
 		if device is not None:
+			device.reset()
 			device.set_configuration()
 			cfg = device.get_active_configuration()
 			intf = cfg[(0, 0)]
@@ -229,8 +230,9 @@ def print_usb(details):
 							e.bEndpointAddress) ==
 						usb.util.ENDPOINT_OUT
 				)
-			ep.write(details['print_code'].encode('utf-8'), 3000000)
+			ep.write(details['print_code'].encode('utf-8'), 300000)
 			usb.util.dispose_resources(device)
+			device.reset()
 			requests.get(
 				f'https://{HOST}/gateway/print_end'
 				f'/{details["print_id"]}/{details["print_secret"]}'

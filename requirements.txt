@@ -4,3 +4,4 @@ pyusb
 # pywin32
 pyodbc
 requests
+pyodbc
