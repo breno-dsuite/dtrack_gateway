@@ -272,13 +272,13 @@ def select_printer(details):
 
 def on_message(ws, message):
 	def ping(evento):
-		host = evento['host']
+		# host = evento['host']
 		data = {
 			"action": "sendmessage",
 			"data": {
 				'type': 'ping',
 				'gateway_token': GATEWAY_TOKEN,
-				'host': host,
+				# 'host': host,
 				}
 			}
 		ws.send(json.dumps(data))
@@ -346,7 +346,6 @@ def on_message(ws, message):
 		ws.send(json.dumps(dados))
 
 	def impressora(evento):
-		host = evento['host']
 		print_id = evento.get('print_id', '')
 		print_secret = evento.get('print_secret', '')
 		print_detail = get_print_details(print_id, print_secret)
@@ -355,9 +354,8 @@ def on_message(ws, message):
 
 
 	def sync(evento):
-		host = evento['host']
 		job_token = evento['job_token']
-		rs = requests.get(f'https://{host}/gateway/sync_start/{job_token}')
+		rs = requests.get(f'https://{HOST}/gateway/sync_start/{job_token}')
 		if rs.status_code == 200:
 			dados = rs.json()
 			model = dados['model']
@@ -374,18 +372,18 @@ def on_message(ws, message):
 				for row in cursor.fetchall():
 					results.append(dict(zip(columns, row)))
 				r = requests.get(
-					f'https://{host}/gateway/sync/{model}/{job_token}',
+					f'https://{HOST}/gateway/sync/{model}/{job_token}',
 					data=json.dumps(results, cls=DateTimeEncoder)
 					)
 
 				if r.status_code != 200:
 					requests.get(
-						f'https://{host}/gateway/sync_error/{job_token}',
+						f'https://{HOST}/gateway/sync_error/{job_token}',
 						data=r.content,
 						)
 			except Exception as ex:
 				requests.get(
-					f'https://{host}/gateway/sync_error/{job_token}',
+					f'https://{HOST}/gateway/sync_error/{job_token}',
 					data=str(ex),
 					)
 				log_to_file(f"SYNC - {model} - {job_token} - {count}")
