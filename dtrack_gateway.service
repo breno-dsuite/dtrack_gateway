@@ -1,12 +1,11 @@
 [Unit]
-Description=DTrack gateway
+Description=DTrack Gateway
 After=multi-user.target
-Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
+WorkingDirectory=/home/pi/dtrack_gateway
 ExecStart=/usr/bin/python3 /home/pi/dtrack_gateway/gateway.py
-StandardInput=tty-force
 
 [Install]
-WantedBy=multi-user.tasrget
+WantedBy=multi-user.target
