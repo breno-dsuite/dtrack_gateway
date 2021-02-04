@@ -390,7 +390,7 @@ def on_message(ws, message):
 
 def on_error(ws, error):
     log_to_file(f"ERROR - {error}")
-    ws.close()
+    #ws.close()
     #connect_websocket()
 
 
