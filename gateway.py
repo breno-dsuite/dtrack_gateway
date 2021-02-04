@@ -379,7 +379,9 @@ def on_message(ws, message):
         'sync': sync,
         }
     if 'type' in message:
-        router[message['type']](message)
+        route = router.get(message['type'])
+        if route:
+            route(message)
     elif 'host' in message:
         HOST = message['host']
     elif 'message' in message:
@@ -390,12 +392,14 @@ def on_message(ws, message):
 
 def on_error(ws, error):
     log_to_file(f"ERROR - {error}")
+    exit()
     #ws.close()
     #connect_websocket()
 
 
 def on_close(ws):
     log_to_file('CLOSE')
+    exit()
 
 
 def on_open(ws):
