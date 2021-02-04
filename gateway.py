@@ -65,7 +65,7 @@ with open('config.json', 'r') as f:
         dados['GATEWAY_SECRET'] = str(uuid.uuid4())
         
 with open('config.json', 'w') as f:
-    f.write(json.dumps(dados))
+    f.write(json.dumps(dados, indent=4))
 
 SERVER_URL = 'ws.dsuite.com.br'
 HOST = 'dtrack.krug.com.br'
