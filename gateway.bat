@@ -1,1 +1,0 @@
-python C:/dtrack_gateway/gateway.py
