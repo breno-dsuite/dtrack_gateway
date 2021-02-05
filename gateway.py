@@ -83,7 +83,7 @@ def log_to_file(log):
     msg = f'{agora()} - {HOST} - {GATEWAY_TOKEN} - {log}\n'
     if DEBUG:
         print(msg)
-    with open(f'{datetime.datetime.now().strftime("%Y-%-j")}.log', 'a') as f:
+    with open(f'{datetime.datetime.now().strftime("%Y-%j")}.log', 'a') as f:
         f.write(msg)
 
 
