@@ -63,12 +63,12 @@ with open('config.json', 'r') as f:
         dados['GATEWAY_TOKEN'] = str(uuid.uuid4())
     if not dados.get('GATEWAY_SECRET', None):
         dados['GATEWAY_SECRET'] = str(uuid.uuid4())
-        
+
 with open('config.json', 'w') as f:
     f.write(json.dumps(dados, indent=4))
 
 SERVER_URL = 'ws.dsuite.com.br'
-HOST = 'dtrack.krug.com.br'
+HOST = ''
 GATEWAY_TOKEN = dados.get('GATEWAY_TOKEN', None)
 GATEWAY_SECRET = dados.get('GATEWAY_SECRET', None)
 DEBUG = dados.get('DEBUG', True)
@@ -83,7 +83,7 @@ def log_to_file(log):
     msg = f'{agora()} - {HOST} - {GATEWAY_TOKEN} - {log}\n'
     if DEBUG:
         print(msg)
-    with open(f'{datetime.datetime.now().strftime("%Y-%-j")}.log', 'a') as f:
+    with open(f'{datetime.datetime.now().strftime("%Y-%j")}.log', 'a') as f:
         f.write(msg)
 
 
@@ -333,10 +333,12 @@ def on_message(ws, message):
 
     def sync(evento):
         job_token = evento['job_token']
-        rs = requests.get(f'https://{HOST}/gateway/sync_start/{job_token}')
+        job_secret = evento['job_secret']
+        url = f'https://{HOST}/gateway/sync_start/{job_token}/{job_secret}'
+        rs = requests.get(url)
         if rs.status_code == 200:
-            dados = rs.json()
-            model = dados['model']
+            dados = json.loads(rs.content)
+            modelo = dados['modelo']
             connection_string = dados['connection_string']
             sql = dados['sql']
 
@@ -349,22 +351,24 @@ def on_message(ws, message):
                 results = []
                 for row in cursor.fetchall():
                     results.append(dict(zip(columns, row)))
+                count = len(results)
+                log_to_file(f"SYNC - {modelo} - {job_token} - {count}")
                 r = requests.get(
-                    f'https://{HOST}/gateway/sync/{model}/{job_token}',
+                    f'https://{HOST}/gateway/sync/{job_token}/{job_secret}',
                     data=json.dumps(results, cls=DateTimeEncoder)
                     )
-
                 if r.status_code != 200:
                     requests.get(
                         f'https://{HOST}/gateway/sync_error/{job_token}',
                         data=r.content,
                         )
+                    log_to_file(f"SYNC ERROR SEND - {modelo} - {job_token}")
             except Exception as ex:
                 requests.get(
                     f'https://{HOST}/gateway/sync_error/{job_token}',
                     data=str(ex),
                     )
-                log_to_file(f"SYNC - {model} - {job_token} - {count}")
+                log_to_file(f"SYNC ERROR - {modelo} - {job_token} - {ex}")
 
     message = json.loads(message)
 
@@ -383,10 +387,12 @@ def on_message(ws, message):
         if route:
             route(message)
     elif 'host' in message:
+        global HOST
         HOST = message['host']
+        print(HOST)
     elif 'message' in message:
         log_to_file(f"ROUTE NOT FOUND - {message}")
-        ws.close()
+        exit()
         #connect_websocket()
 
 
