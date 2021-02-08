@@ -118,6 +118,19 @@ def get_print_jobs():
     return []
 
 
+def get_print_code(print_id, print_secret):
+    tentativas = 10
+    tempo_espera = 1
+    for x in range(tentativas):
+        r = requests.get(
+            f'https://{HOST}/gateway/print_code'
+            f'/{print_id}/{print_secret}')
+        if r.status_code == 200:
+            return r.content
+        time.sleep(tempo_espera)
+    return b''
+
+
 def get_print_details(print_id, print_secret):
     tentativas = 10
     tempo_espera = 1
@@ -328,8 +341,11 @@ def on_message(ws, message):
         print_secret = evento.get('print_secret', '')
         print_detail = get_print_details(print_id, print_secret)
         if print_detail:
+            if not print_detail['print_code']:
+                print_detail['print_code'] = get_print_code(
+                    print_id, print_secret
+                    )
             select_printer(print_detail)
-
 
     def sync(evento):
         job_token = evento['job_token']
