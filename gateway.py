@@ -172,11 +172,13 @@ def print_windows(details):
 
 
 def print_network(details):
+    if not isinstance(details['print_code'], bytes):
+        details['print_code'] = details['print_code'].encode('utf-8')
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # s.settimeout(timeout)
         try:
             s.connect((details["printer_ip"], int(details["printer_port"])))
-            s.send(details['print_code'].encode('utf-8'))
+            s.send(details['print_code'])
             requests.get(
                 f'https://{HOST}/gateway/print_end'
                 f'/{details["print_id"]}/{details["print_secret"]}'
