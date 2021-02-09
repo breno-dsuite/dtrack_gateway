@@ -1,8 +1,4 @@
 {
-"SECURE": true,
-"SERVER_URL": "ws.dsuite.com.br",
-"HOST": "dtrack.com.br",
-"GATEWAY_TOKEN": "",
-"GATEWAY_SECRET": "",
-"DEBUG": true
+"DEBUG": true,
+"DEBUG_WS": true
 }
