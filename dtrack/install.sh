@@ -8,4 +8,4 @@ sudo systemctl enable dtrack_gateway.service
 sudo systemctl start dtrack_gateway.service
 
 line="*/15 * * * * sh /home/dtrack/dtrack_gateway/dtrack/reload.sh"
-(crontab -u dtrack -l; echo "$line" ) | crontab -u dtrack -
+(crontab -u root -l; echo "$line" ) | crontab -u root -
