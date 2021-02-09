@@ -370,8 +370,8 @@ def on_message(ws, message):
 			try:
 				connection = pyodbc.connect(connection_string)
 				connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
-				connection.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
-				connection.setdecoding(pyodbc.SQL_WMETADATA, encoding='utf-8')
+				# connection.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
+				# connection.setdecoding(pyodbc.SQL_WMETADATA, encoding='utf-8')
 				connection.setencoding(encoding='utf-8')
 				cursor = connection.cursor().execute(sql)
 				columns = [column[0] for column in cursor.description]
