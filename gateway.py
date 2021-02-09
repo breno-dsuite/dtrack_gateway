@@ -370,13 +370,13 @@ def on_message(ws, message):
 			try:
 				connection = pyodbc.connect(connection_string)
 				connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
-				# connection.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
-				connection.setdecoding(pyodbc.SQL_WMETADATA, encoding='utf-8')
 				connection.setencoding(encoding='utf-8')
 				cursor = connection.cursor().execute(sql)
 				columns = [column[0] for column in cursor.description]
+				log_to_file(columns)
 				results = []
 				for row in cursor.fetchall():
+					log_to_file(row)
 					results.append(dict(zip(columns, row)))
 				count = len(results)
 				log_to_file(f"SYNC - {modelo} - {job_token} - {count}")
@@ -416,7 +416,6 @@ def on_message(ws, message):
 	elif 'host' in message:
 		global HOST
 		HOST = message['host']
-		print(HOST)
 	elif 'message' in message:
 		log_to_file(f"ROUTE NOT FOUND - {message}")
 		exit()
