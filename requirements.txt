@@ -2,6 +2,6 @@ serial
 websocket_client
 pyusb
 # pywin32
-pyodbc
+#pyodbc
 requests
-pyodbc
+#brew install unixodbc
