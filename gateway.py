@@ -299,9 +299,9 @@ def on_message(ws, message):
                                    baudrate=baudrate,
                                    bytesize=bytesize,
                                    stopbits=stopbits,
-                                   parity=parity,
+                                   #parity=parity,
                                    timeout=timeout,
-                                   xonxoff=xonxoff,
+                                   #xonxoff=xonxoff,
                                    rtscts=rtscts
                                    ) as ser:
                     t = ser.readline().decode()
