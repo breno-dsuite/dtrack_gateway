@@ -73,7 +73,7 @@ with open('config.json', 'w') as f:
     f.write(json.dumps(dados, indent=4))
 
 SERVER_URL = 'ws.dsuite.com.br'
-HOST = ''
+HOST = dados.get('HOST', '')
 GATEWAY_TOKEN = dados.get('GATEWAY_TOKEN', None)
 GATEWAY_SECRET = dados.get('GATEWAY_SECRET', None)
 DEBUG = dados.get('DEBUG', True)
@@ -276,6 +276,10 @@ def on_message(ws, message):
     def ping(evento):
         rs = requests.get(f'https://{HOST}/gateway/ping/{GATEWAY_TOKEN}')
 
+    def aws_secret(evento):
+        with open('aws_secret.json', 'w') as f:
+            f.write(json.dumps(evento, indent=4))
+
     def pesagem(evento):
         def ler_serial():
             def parse_peso(str_peso):
@@ -398,6 +402,7 @@ def on_message(ws, message):
         'impressora': impressora,
         'impressora_cupom': impressora,
         'sync': sync,
+        'aws_secret': aws_secret,
     }
     if 'type' in message:
         route = router.get(message['type'])
@@ -406,6 +411,11 @@ def on_message(ws, message):
     elif 'host' in message:
         global HOST
         HOST = message['host']
+        if dados['HOST'] != message['host']:
+            dados['HOST'] = message['host']
+            with open('config.json', 'w') as f:
+                f.write(json.dumps(dados, indent=4))
+
     elif 'message' in message:
         log_to_file(f"ROUTE NOT FOUND - {message}")
         exit()
