@@ -116,9 +116,8 @@ def sync(evento):
 					MessageBody=json.dumps(
 						{
 							**evento,
-							'results': results,
-						},
-						cls=DateTimeEncoder),
+							'results': json.dumps(results, cls=DateTimeEncoder)
+						}),
 					MessageDeduplicationId=msg_id,
 					MessageGroupId=msg_id
 					)
