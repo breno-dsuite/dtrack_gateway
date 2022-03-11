@@ -145,41 +145,41 @@ def sync(evento):
 
 	return False
 
-if __name__ == "__main__":
-	if not HOST:
-		raise ValueError('Definir HOST')
+# if __name__ == "__main__":
+if not HOST:
+	raise ValueError('Definir HOST')
 
-	def receive_messages(queue, max_number=10, wait_time=20):
-		"""
-		Receive a batch of messages in a single request from an SQS queue.
+def receive_messages(queue, max_number=10, wait_time=20):
+	"""
+	Receive a batch of messages in a single request from an SQS queue.
 
-		:param queue: The queue from which to receive messages.
-		:param max_number: The maximum number of messages to receive. The actual number
-						   of messages received might be less.
-		:param wait_time: The maximum time to wait (in seconds) before returning. When
-						  this number is greater than zero, long polling is used. This
-						  can result in reduced costs and fewer false empty responses.
-		:return: The list of Message objects received. These each contain the body
-				 of the message and metadata and custom attributes.
-		"""
-		try:
-			messages = queue.receive_messages(
-				MessageAttributeNames=['All'],
-				MaxNumberOfMessages=max_number,
-				WaitTimeSeconds=wait_time
-				)
-			for msg in messages:
-				yield msg
-		except ClientError as error:
-			raise error
-		else:
-			return messages
-	queue = sqs.get_queue_by_name(QueueName='DTrackSync.fifo')
-	while True:
-		print('RECEBENDO')
-		for msg in receive_messages(queue):
-			print(msg)
-			sync(json.loads(msg.body))
+	:param queue: The queue from which to receive messages.
+	:param max_number: The maximum number of messages to receive. The actual number
+					   of messages received might be less.
+	:param wait_time: The maximum time to wait (in seconds) before returning. When
+					  this number is greater than zero, long polling is used. This
+					  can result in reduced costs and fewer false empty responses.
+	:return: The list of Message objects received. These each contain the body
+			 of the message and metadata and custom attributes.
+	"""
+	try:
+		messages = queue.receive_messages(
+			MessageAttributeNames=['All'],
+			MaxNumberOfMessages=max_number,
+			WaitTimeSeconds=wait_time
+			)
+		for msg in messages:
+			yield msg
+	except ClientError as error:
+		raise error
+	else:
+		return messages
+queue = sqs.get_queue_by_name(QueueName='DTrackSync.fifo')
+while True:
+	print('RECEBENDO')
+	for msg in receive_messages(queue):
+		print(msg)
+		sync(json.loads(msg.body))
 
 	# sqs_polling(
 	# 	queue_url=QUEUE_URL,
