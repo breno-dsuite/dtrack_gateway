@@ -88,61 +88,63 @@ def sync(evento):
 	job_token = evento['job_token']
 	job_secret = evento['job_secret']
 	url = f'https://{HOST}/gateway/sync_start/{job_token}/{job_secret}'
-	rs = requests.get(url, timeout=15)
-	log_to_file(f'JOB - {job_token}')
-	if rs.status_code == 200:
-		dados = json.loads(rs.content)
-		log_to_file(f'DADOS - {dados}')
-		modelo = dados['modelo']
-		connection_string = dados['connection_string']
-		sql = dados['sql']
-		try:
-			import pyodbc
-			connection = pyodbc.connect(connection_string, timeout=10)
-			log_to_file(f'CONNECT - {modelo} - {job_token}')
-			connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
-			connection.setencoding(encoding='utf-8')
-			cursor = connection.cursor().execute(sql)
-			log_to_file(f'QUERY - {modelo} - {job_token}')
-			columns = [column[0] for column in cursor.description]
-			log_to_file(columns)
-			results = []
-			for row in cursor.fetchall():
-				# log_to_file(row)
-				results.append(dict(zip(columns, row)))
-			msg_id = str(uuid.uuid4())
-			response = out_queue.send_message(
-				MessageBody=json.dumps(results, cls=DateTimeEncoder),
-				MessageDeduplicationId=msg_id,
-				MessageGroupId=msg_id
+	try:
+		rs = requests.get(url, timeout=20)
+		log_to_file(f'JOB - {job_token}')
+		if rs.status_code == 200:
+			dados = json.loads(rs.content)
+			log_to_file(f'DADOS - {dados}')
+			modelo = dados['modelo']
+			connection_string = dados['connection_string']
+			sql = dados['sql']
+			try:
+				import pyodbc
+				connection = pyodbc.connect(connection_string, timeout=10)
+				log_to_file(f'CONNECT - {modelo} - {job_token}')
+				connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
+				connection.setencoding(encoding='utf-8')
+				cursor = connection.cursor().execute(sql)
+				log_to_file(f'QUERY - {modelo} - {job_token}')
+				columns = [column[0] for column in cursor.description]
+				log_to_file(columns)
+				results = []
+				for row in cursor.fetchall():
+					# log_to_file(row)
+					results.append(dict(zip(columns, row)))
+				msg_id = str(uuid.uuid4())
+				response = out_queue.send_message(
+					MessageBody=json.dumps(results, cls=DateTimeEncoder),
+					MessageDeduplicationId=msg_id,
+					MessageGroupId=msg_id
+					)
+				count = len(results)
+				log_to_file(f"SYNC - {modelo} - {job_token} - {count}")
+				return True
+				# r = requests.get(
+				# 	f'https://{HOST}/gateway/sync/{job_token}/{job_secret}',
+				# 	data=json.dumps(results, cls=DateTimeEncoder),
+				# 	timeout=120,
+				# )
+				# log_to_file('SEND OK')
+				# if r.status_code != 200:
+				# 	requests.get(
+				# 		f'https://{HOST}/gateway/sync_error/{job_token}',
+				# 		data=r.content,
+				# 		timeout=5,
+				# 	)
+				# 	log_to_file(f"SYNC ERROR SEND - {modelo} - {job_token}")
+				# else:
+				# 	return True
+
+			except Exception as ex:
+				requests.get(
+					f'https://{HOST}/gateway/sync_error/{job_token}',
+					data=str(ex),
+					timeout=5,
 				)
-			count = len(results)
-			log_to_file(f"SYNC - {modelo} - {job_token} - {count}")
-			return True
-			# r = requests.get(
-			# 	f'https://{HOST}/gateway/sync/{job_token}/{job_secret}',
-			# 	data=json.dumps(results, cls=DateTimeEncoder),
-			# 	timeout=120,
-			# )
-			# log_to_file('SEND OK')
-			# if r.status_code != 200:
-			# 	requests.get(
-			# 		f'https://{HOST}/gateway/sync_error/{job_token}',
-			# 		data=r.content,
-			# 		timeout=5,
-			# 	)
-			# 	log_to_file(f"SYNC ERROR SEND - {modelo} - {job_token}")
-			# else:
-			# 	return True
-
-		except Exception as ex:
-			requests.get(
-				f'https://{HOST}/gateway/sync_error/{job_token}',
-				data=str(ex),
-				timeout=5,
-			)
-			log_to_file(f"SYNC ERROR - {modelo} - {job_token} - {ex}")
-
+				log_to_file(f"SYNC ERROR - {modelo} - {job_token} - {ex}")
+	except requests.ReadTimeout:
+		return False
 	return False
 
 # if __name__ == "__main__":
