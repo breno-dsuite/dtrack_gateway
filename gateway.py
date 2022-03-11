@@ -278,7 +278,7 @@ def on_message(ws, message):
 
     def aws_secret(evento):
         with open('aws_secret.json', 'w') as f:
-            f.write(json.dumps(evento, indent=4))
+            f.write(json.dumps(evento['aws_secret'], indent=4))
 
     def pesagem(evento):
         def ler_serial():
