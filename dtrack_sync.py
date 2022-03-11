@@ -21,7 +21,8 @@ except IOError:
 	exit()
 
 HOST = dados.get('HOST', '')
-DEBUG = dados.get('DEBUG', True)
+# DEBUG = dados.get('DEBUG', True)
+DEBUG = True
 QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/509609055537/DTrackSync.fifo'
 
 
@@ -175,7 +176,9 @@ if __name__ == "__main__":
 			return messages
 	queue = sqs.get_queue_by_name(QueueName='DTrackSync.fifo')
 	while True:
+		print('RECEBENDO')
 		for msg in receive_messages(queue):
+			print(msg)
 			sync(json.loads(msg.body))
 
 	# sqs_polling(
