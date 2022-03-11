@@ -79,8 +79,8 @@ def sync(evento):
     job_token = evento['job_token']
     job_secret = evento['job_secret']
     url = f'https://{HOST}/gateway/sync_start/{job_token}/{job_secret}'
-    print('JOB OK')
     rs = requests.get(url, timeout=5)
+    log_to_file(f'JOB - {job_token}')
     if rs.status_code == 200:
         dados = json.loads(rs.content)
         modelo = dados['modelo']
@@ -89,11 +89,11 @@ def sync(evento):
         try:
             import pyodbc
             connection = pyodbc.connect(connection_string, timeout=10)
-            print('CONNECT OK')
+            log_to_file(f'CONNECT - {modelo} - {job_token}')
             connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
             connection.setencoding(encoding='utf-8')
             cursor = connection.cursor().execute(sql)
-            print('QUERY OK')
+            log_to_file(f'QUERY - {modelo} - {job_token}')
             columns = [column[0] for column in cursor.description]
             log_to_file(columns)
             results = []
@@ -107,7 +107,7 @@ def sync(evento):
                 data=json.dumps(results, cls=DateTimeEncoder),
 	            timeout=120,
             )
-            print('SEND OK')
+            log_to_file('SEND OK')
             if r.status_code != 200:
                 requests.get(
                     f'https://{HOST}/gateway/sync_error/{job_token}',
