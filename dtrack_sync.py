@@ -83,6 +83,7 @@ def sync(evento):
     log_to_file(f'JOB - {job_token}')
     if rs.status_code == 200:
         dados = json.loads(rs.content)
+        log_to_file(f'DADOS - {dados}')
         modelo = dados['modelo']
         connection_string = dados['connection_string']
         sql = dados['sql']
