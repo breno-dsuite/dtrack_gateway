@@ -107,7 +107,7 @@ def connect_websocket():
     ws.on_open = on_open
     ws.run_forever(
         skip_utf8_validation=True,
-        ping_interval=60,
+        ping_interval=10,
         ping_timeout=5,
     )
 
@@ -357,7 +357,7 @@ def on_message(ws, message):
             sql = dados['sql']
             try:
                 import pyodbc
-                connection = pyodbc.connect(connection_string)
+                connection = pyodbc.connect(connection_string, timeout=10)
                 connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
                 connection.setencoding(encoding='utf-8')
                 cursor = connection.cursor().execute(sql)
@@ -365,7 +365,8 @@ def on_message(ws, message):
                 log_to_file(columns)
                 results = []
                 for row in cursor.fetchall():
-                    log_to_file(row)
+                    if DEBUG:
+                        log_to_file(row)
                     results.append(dict(zip(columns, row)))
                 count = len(results)
                 log_to_file(f"SYNC - {modelo} - {job_token} - {count}")
