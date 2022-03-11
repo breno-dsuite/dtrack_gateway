@@ -1,7 +1,8 @@
-serial
+pyserial
 websocket_client
 pyusb
 # pywin32
 #pyodbc
 requests
 #brew install unixodbc
+sqs_polling
