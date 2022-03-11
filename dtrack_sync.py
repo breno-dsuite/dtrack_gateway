@@ -112,7 +112,7 @@ def sync(evento):
 				results.append(dict(zip(columns, row)))
 			msg_id = str(uuid.uuid4())
 			response = out_queue.send_message(
-				MessageBody=json.dumps(results),
+				MessageBody=json.dumps(results, cls=DateTimeEncoder),
 				MessageDeduplicationId=msg_id,
 				MessageGroupId=msg_id
 				)
