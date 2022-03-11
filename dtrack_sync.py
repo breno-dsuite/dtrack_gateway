@@ -185,7 +185,9 @@ while True:
 	print('RECEBENDO')
 	for msg in receive_messages(queue):
 		print(msg)
-		sync(json.loads(msg.body))
+		r = sync(json.loads(msg.body))
+		if bool(r):
+			msg.delete()
 
 	# sqs_polling(
 	# 	queue_url=QUEUE_URL,
