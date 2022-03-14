@@ -1,3 +1,4 @@
+aws_secret.json
 config.json
 gateway.log
 *.log

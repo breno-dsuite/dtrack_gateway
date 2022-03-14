@@ -182,9 +182,8 @@ def receive_messages(queue, max_number=10, wait_time=20):
 		return messages
 queue = sqs.get_queue_by_name(QueueName='DTrackSync.fifo')
 while True:
-	print('RECEBENDO')
 	for msg in receive_messages(queue):
-		print(msg)
+		# print(msg)
 		r = sync(json.loads(msg.body))
 		if bool(r):
 			msg.delete()

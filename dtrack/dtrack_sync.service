@@ -1,0 +1,13 @@
+[Unit]
+Description=DTrack Sync
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=30
+WorkingDirectory=/home/dtrack/dtrack_gateway
+ExecStart=/usr/bin/python3 /home/dtrack/dtrack_gateway/dtrack_sync.py
+
+[Install]
+WantedBy=network-online.target
