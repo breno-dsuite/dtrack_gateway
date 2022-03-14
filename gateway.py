@@ -163,7 +163,7 @@ def print_windows(details):
             try:
                 win32print.StartPagePrinter(printer)
                 win32print.WritePrinter(
-                    printer, details['print_code'].encode('utf-8')
+                    printer, details['print_code']
                 )
                 win32print.EndPagePrinter(printer)
                 r = requests.get(
@@ -411,7 +411,7 @@ def on_message(ws, message):
     elif 'host' in message:
         global HOST
         HOST = message['host']
-        if dados['HOST'] != message['host']:
+        if not dados.get('HOST'):
             dados['HOST'] = message['host']
             with open('config.json', 'w') as f:
                 f.write(json.dumps(dados, indent=4))
